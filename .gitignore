@@ -1,0 +1,50 @@
+# Python-related files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.cover
+*.log
+*.pot
+*.mo
+*.swp
+*.swo
+*.db
+*.sqlite3
+*.env
+
+# Django-related files
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+*.env
+
+# IDE-related files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS-related files
+.DS_Store
+
+# JetBrains IDEs
+*.idea/
+*.iml
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# PyCharm files
+*.py[cod]
+__pycache__/
+*.so
+.idea/
