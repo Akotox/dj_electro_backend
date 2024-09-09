@@ -120,10 +120,14 @@ class FilterSimilarProducts(generics.ListAPIView):
     def get_queryset(self):
         # Get the category from query parameters
         category_id = self.request.query_params.get('category', None)
+        product_id = self.request.query_params.get('product_id', None)
 
         if category_id:
-            # Filter products by the given category ID
+            # Filter products by the given category ID and exclude the current product
             queryset = Product.objects.filter(category_id=category_id)
+
+            if product_id:
+                queryset = queryset.exclude(id=product_id)
 
             # Shuffle the queryset and limit to 6 items
             queryset_list = list(queryset)
