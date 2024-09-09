@@ -1,0 +1,27 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore macOS-specific files
+.DS_Store
+
+# Ignore environment variables file
+# .env
+
+# Ignore Git directory
+.git
+
+# Ignore log files
+*.log
+
+# Ignore IDE directories
+.idea/
+
+# Ignore virtual environment directory
+venv/
+
+# Ignore previous migrations
+**/migrations/*
+!**/migrations/__init__.py
