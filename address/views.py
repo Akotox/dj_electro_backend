@@ -32,7 +32,7 @@ class UserAddressesView(ListAPIView):
         if not user_id:
             return Response({"message": "User id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Address.objects.filter(user=user_id)
+        return Address.objects.filter(user=user_id).order_by('-created_at')
 
 
 class DeleteAddressView(APIView):
@@ -95,3 +95,18 @@ class UpdateDefaultAddressView(APIView):
         new_default_address.save()
 
         return Response({"message": "Default address updated successfully."}, status=status.HTTP_200_OK)
+
+class GetDafaultAddressView(APIView):
+    def get(self, request):
+        user_id = request.query_params.get('user_id')
+
+        if not user_id:
+            return Response({"message": "User id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        default_address = Address.objects.get(user=user_id, is_default=True)
+
+        if default_address:
+            serializer = AddressSerializer(default_address)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No default address found."}, status=status.HTTP_404_NOT_FOUND)
