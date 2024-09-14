@@ -8,7 +8,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "4da4-41-216-204-166.ngrok-free.app", "0.0.0.0:8000",
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "7f75-41-216-204-166.ngrok-free.app", "0.0.0.0:8000",
                  "127.0.0.1:4040"]
 
 # Application definition
