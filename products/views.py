@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from stores.models import Store
 from products.models import Category, Brand, Product
-from .serializers import ProductSerializer, CategorySerializer, BrandSerializer, VariationSerializer, AccessorySerializer
+from .serializers import AddProductSerializer, ProductSerializer, CategorySerializer, BrandSerializer, VariationSerializer, AccessorySerializer, ProductListSerializer
 
 
 class HomeCategoryList(generics.ListAPIView):
@@ -49,7 +49,7 @@ class BrandList(generics.ListAPIView):
 
 
 class ProductList(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
 
     def get_queryset(self):
         # Get only available products and annotate with a random value
@@ -64,13 +64,13 @@ class ProductList(generics.ListAPIView):
 
 
 class ProductPagination(PageNumberPagination):
-    page_size = 20  # Number of items per page
+    page_size = 10  # Number of items per page
     page_size_query_param = 'page_size'
     max_page_size = 100  # Optional, if you want to limit the maximum page size
 
 
 class DiscountedProductList(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     pagination_class = ProductPagination
 
     def get_queryset(self):
@@ -80,7 +80,7 @@ class DiscountedProductList(generics.ListAPIView):
 
 
 class CategoryProductList(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     pagination_class = ProductPagination
 
     def get_queryset(self):
@@ -97,7 +97,7 @@ class CategoryProductList(generics.ListAPIView):
 
 
 class BrandProductList(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     pagination_class = ProductPagination
 
     def get_queryset(self):
@@ -114,7 +114,7 @@ class BrandProductList(generics.ListAPIView):
 
 
 class FilterSimilarProducts(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     pagination_class = None  # Disable pagination if you don't need it here
 
     def get_queryset(self):
@@ -152,7 +152,7 @@ class ProductFilter(django_filters.FilterSet):
 
 class ProductSearchView(generics.ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = ProductFilter
     ordering = ['-price']  # Default ordering, can be adjusted
@@ -237,21 +237,23 @@ class AddProduct(APIView):
     def post(self, request):
         product_data = request.data
 
-        # Check if the store reference exists
+        # Get the store reference ID from the request
         store_ref = product_data.get('store_ref')
         try:
-            store = Store.objects.get(id=store_ref)
+            store = Store.objects.get(id=store_ref)  # Fetch the store object by ID
         except Store.DoesNotExist:
             return Response({"message": "Store reference does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        # If checks pass, create the product
+        # Add store ID to the product data
+        product_data['store_ref'] = store.id
+
+        # Deserialize and validate the product data
         product_serializer = ProductSerializer(data=product_data)
         if product_serializer.is_valid():
-            product = product_serializer.save()  # Save the product and get the instance
-            return Response({"id": product.id}, status=status.HTTP_201_CREATED)  # Return only the id
+            product = product_serializer.save()  # Save the product instance
+            return Response({"id": product.id}, status=status.HTTP_201_CREATED)  # Return only the product id
         else:
             return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class CheckProductAvailability(APIView):
     def get(self, request):

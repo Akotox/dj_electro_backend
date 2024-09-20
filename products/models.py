@@ -66,6 +66,7 @@ class Variation(models.Model):
     ]
     color = models.CharField(max_length=50)
     title = models.CharField(max_length=255)
+    is_available = models.BooleanField(default=True)
     reference = models.ForeignKey('Product', related_name='variations', on_delete=models.CASCADE)  # Link to one product
     capacity = models.CharField(max_length=50)
     condition = models.CharField(max_length=50, choices=CONDITION_CHOICES, default=CONDITION_CHOICES[1])
