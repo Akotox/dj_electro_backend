@@ -63,11 +63,10 @@ class BrandSerializer(serializers.ModelSerializer):
 
 
 class ProductPartialSerializer(serializers.ModelSerializer):
-    product_image = serializers.URLField(source='image_urls[0]', read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'product_image']
+        fields = ['id', 'title', 'image_urls', 'condition', 'ratings']
 
 
 class ProductListSerializer(serializers.ModelSerializer):

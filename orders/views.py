@@ -12,44 +12,53 @@ from stores.models import Store, StoreOrder
 
 # Create your views here.
 class OrdersPagination(PageNumberPagination):
-    page_size = 20  # Number of items per page
+    page_size = 20  # Number of items per page by default
     page_size_query_param = 'page_size'
     max_page_size = 100  # Optional, if you want to limit the maximum page size
 
 
 class OrderListView(APIView):
+    pagination_class = OrdersPagination
+    serializer_class = OrderSerializer
+
     def get(self, request):
-        # Get order_status and user_id from the request's query parameters
+        # Get order_status, payment_status, and user_id from query parameters
         order_status = request.query_params.get('order_status')
         payment_status = request.query_params.get('payment_status')
         user_id = request.query_params.get('user_id')
 
-        print(order_status, user_id)
         # Validate presence of required parameters
         if not order_status:
             return Response({"message": "Order status is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user_id:
-            return Response({"message": "User id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Filter orders based on order_status and user_id
         filters = {
             'order_status': order_status,
             'user': user_id,
-            'payment_status': payment_status
         }
+        if payment_status:
+            filters['payment_status'] = payment_status
 
+        # Validate order status
         if order_status not in ['confirmed', 'shipped', 'delivered', 'failed', 'pending']:
-
             return Response({"message": "Order status is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-        # If order_status is one of the following, ensure payment_status is 'paid'
-        else:
-            queryset = Order.objects.filter(**filters)
 
-        # Serialize the queryset
-        serializer = OrderSerializer(queryset, many=True)
+        # Filter the orders based on the provided filters
+        queryset = Order.objects.filter(**filters)
 
-        # Return the serialized data as a response
+        # Apply pagination
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        
+        if page is not None:
+            serializer = self.serializer_class(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        # If no pagination is applied (e.g., when queryset is small)
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
